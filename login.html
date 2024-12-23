@@ -93,17 +93,27 @@
             <button onclick="showCategory('colab')"><i class="fas fa-code"></i> Colab Files</button>
             <button onclick="showCategory('datasets')"><i class="fas fa-database"></i> Datasets</button>
             <button onclick="showCategory('tasks')"><i class="fas fa-tasks"></i> Tasks</button>
+            <button onclick="redirectToGoogleForm('attendance')"><i class="fas fa-users"></i> Attendance</button>
+            <button onclick="redirectToGoogleForm('file-upload')"><i class="fas fa-upload"></i> Upload File</button>
         </div>
+
         <div id="content" class="content">
             <h3 id="content-title"></h3>
             <ul id="content-list"></ul>
         </div>
     </main>
+
     <footer>
         <p>&copy; 2024 Plant Disease Prediction Project</p>
     </footer>
 
     <script>
+        // Google Form URLs
+        const googleForms = {
+            attendance: "https://forms.gle/your-attendance-form-url",
+            'file-upload': "https://forms.gle/your-file-upload-form-url"
+        };
+
         // File and task data
         const data = {
             presentations: [
@@ -159,6 +169,13 @@
                 content.style.display = 'block';
             } else {
                 content.style.display = 'none';
+            }
+        }
+
+        // Redirect to Google Form
+        function redirectToGoogleForm(type) {
+            if (googleForms[type]) {
+                window.location.href = googleForms[type];
             }
         }
     </script>
