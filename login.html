@@ -48,6 +48,18 @@
             background-color: #218838;
             transform: scale(1.05);
         }
+        .search {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search input {
+            padding: 10px;
+            width: 80%;
+            max-width: 500px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
         .content {
             display: none;
             animation: fadeIn 0.5s ease-in-out;
@@ -97,6 +109,10 @@
             <button onclick="redirectToGoogleForm('file-upload')"><i class="fas fa-upload"></i> Upload File</button>
         </div>
 
+        <div class="search">
+            <input type="text" id="search-bar" placeholder="Search..." oninput="searchItems()">
+        </div>
+
         <div id="content" class="content">
             <h3 id="content-title"></h3>
             <ul id="content-list"></ul>
@@ -108,13 +124,11 @@
     </footer>
 
     <script>
-        // Google Form URLs
         const googleForms = {
             attendance: "https://forms.office.com/pages/responsepage.aspx?id=pDcHlUcpzkacU0co8B_VmBKjrn5LxzZFjTOV1tOny3pUN0pVWFc3WVNSNElNV01BN1A5TFFJVVdCNy4u&route=shorturl",
             'file-upload': "https://docs.google.com/forms/d/e/1FAIpQLSezMjaO3ZIRAybrseqx7usLRtsTsX0gtwE3tBHDWtaYK2SlGQ/viewform?usp=dialog"
         };
 
-        // File and task data
         const data = {
             presentations: [
                 { name: "Dataset Description", link: "https://drive.google.com/open?id=1oN_FS9UVtU68vDyvsJzxybPRxanS2sBV" },
@@ -141,16 +155,13 @@
             ]
         };
 
-        // Function to display selected category
         function showCategory(category) {
             const content = document.getElementById('content');
             const contentTitle = document.getElementById('content-title');
             const contentList = document.getElementById('content-list');
 
-            // Clear existing content
             contentList.innerHTML = '';
 
-            // Update title and list based on category
             if (data[category]) {
                 contentTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                 data[category].forEach(item => {
@@ -172,10 +183,49 @@
             }
         }
 
-        // Redirect to Google Form
         function redirectToGoogleForm(type) {
             if (googleForms[type]) {
                 window.location.href = googleForms[type];
+            }
+        }
+
+        function searchItems() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            const content = document.getElementById('content');
+            const contentTitle = document.getElementById('content-title');
+            const contentList = document.getElementById('content-list');
+
+            contentList.innerHTML = '';
+            let found = false;
+
+            Object.keys(data).forEach(category => {
+                data[category].forEach(item => {
+                    const name = item.name.toLowerCase();
+                    if (name.includes(query)) {
+                        const li = document.createElement('li');
+                        if (item.link) {
+                            const a = document.createElement('a');
+                            a.href = item.link;
+                            a.target = '_blank';
+                            a.textContent = item.name;
+                            li.appendChild(a);
+                        } else {
+                            li.textContent = `${item.name} (Deadline: ${item.deadline})`;
+                        }
+                        contentList.appendChild(li);
+                        found = true;
+                    }
+                });
+            });
+
+            if (found) {
+                contentTitle.textContent = 'Search Results';
+                content.style.display = 'block';
+            } else if (query.trim() !== '') {
+                contentTitle.textContent = 'No Results Found';
+                content.style.display = 'block';
+            } else {
+                content.style.display = 'none';
             }
         }
     </script>
