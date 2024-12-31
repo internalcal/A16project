@@ -7,80 +7,104 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f9;
             color: #333;
         }
         header {
-            background-color: #28a745;
+            background: linear-gradient(90deg, #28a745, #218838);
             color: white;
             padding: 20px;
             text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         main {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 20px auto;
             padding: 20px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         .buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         .buttons button {
-            background-color: #28a745;
+            background: linear-gradient(90deg, #28a745, #218838);
             color: white;
             border: none;
-            border-radius: 5px;
-            padding: 15px 20px;
+            border-radius: 8px;
+            padding: 15px 25px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         .buttons button:hover {
-            background-color: #218838;
-            transform: scale(1.05);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
         .search {
             margin-bottom: 20px;
             text-align: center;
         }
         .search input {
-            padding: 10px;
+            padding: 12px;
             width: 80%;
             max-width: 500px;
             font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .content {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
         }
-        .content ul {
-            list-style: none;
-            padding: 0;
-        }
-        .content ul li {
-            background: #f9f9f9;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .content ul li a {
-            color: #007bff;
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
             text-decoration: none;
-            font-weight: bold;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
         }
-        .content ul li a:hover {
-            text-decoration: underline;
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #28a745, #218838);
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .card-icon {
+            font-size: 60px;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
         footer {
             text-align: center;
@@ -88,9 +112,12 @@
             font-size: 14px;
             color: #666;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .upload-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .upload-section input[type="file"] {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -105,17 +132,17 @@
             <button onclick="showCategory('colab')"><i class="fas fa-code"></i> Colab Files</button>
             <button onclick="showCategory('datasets')"><i class="fas fa-database"></i> Datasets</button>
             <button onclick="showCategory('tasks')"><i class="fas fa-tasks"></i> Tasks</button>
-            <button onclick="redirectToGoogleForm('attendance')"><i class="fas fa-users"></i> Attendance</button>
-            <button onclick="redirectToGoogleForm('file-upload')"><i class="fas fa-upload"></i> Upload File</button>
+            <button onclick="redirectToAttendance()"><i class="fas fa-users"></i> Attendance</button>
+            <button onclick="redirectToForm()"><i class="fas fa-upload"></i> Upload File</button>
         </div>
 
         <div class="search">
             <input type="text" id="search-bar" placeholder="Search..." oninput="searchItems()">
         </div>
 
-        <div id="content" class="content">
+        <div id="content" style="display: none;">
             <h3 id="content-title"></h3>
-            <ul id="content-list"></ul>
+            <div id="card-container" class="cards"></div>
         </div>
     </main>
 
@@ -124,11 +151,6 @@
     </footer>
 
     <script>
-        const googleForms = {
-            attendance: "https://forms.office.com/pages/responsepage.aspx?id=pDcHlUcpzkacU0co8B_VmBKjrn5LxzZFjTOV1tOny3pUN0pVWFc3WVNSNElNV01BN1A5TFFJVVdCNy4u&route=shorturl",
-            'file-upload': "https://docs.google.com/forms/d/e/1FAIpQLSezMjaO3ZIRAybrseqx7usLRtsTsX0gtwE3tBHDWtaYK2SlGQ/viewform?usp=dialog"
-        };
-
         const data = {
             presentations: [
                 { name: "Dataset Description", link: "https://drive.google.com/open?id=1oN_FS9UVtU68vDyvsJzxybPRxanS2sBV" },
@@ -148,80 +170,76 @@
               { "name": "Write Code for Each Layer in a CNN Architecture", "deadline": "19-Jan-2024" }
             ]
 
+
         };
 
         function showCategory(category) {
+            const container = document.getElementById('card-container');
             const content = document.getElementById('content');
-            const contentTitle = document.getElementById('content-title');
-            const contentList = document.getElementById('content-list');
-
-            contentList.innerHTML = '';
-
+            const title = document.getElementById('content-title');
+            container.innerHTML = '';
             if (data[category]) {
-                contentTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                 data[category].forEach(item => {
-                    const li = document.createElement('li');
-                    if (item.link) {
-                        const a = document.createElement('a');
-                        a.href = item.link;
-                        a.target = '_blank';
-                        a.textContent = item.name;
-                        li.appendChild(a);
-                    } else {
-                        li.textContent = `${item.name} (Deadline: ${item.deadline})`;
-                    }
-                    contentList.appendChild(li);
+                    const card = document.createElement('a');
+                    card.href = item.link;
+                    card.target = "_blank";
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-icon"><i class="fas fa-folder-open"></i></div>
+                        <div class="card-title">${item.name}</div>
+                    `;
+                    container.appendChild(card);
                 });
+                title.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                 content.style.display = 'block';
             } else {
                 content.style.display = 'none';
-            }
-        }
-
-        function redirectToGoogleForm(type) {
-            if (googleForms[type]) {
-                window.location.href = googleForms[type];
             }
         }
 
         function searchItems() {
             const query = document.getElementById('search-bar').value.toLowerCase();
+            const container = document.getElementById('card-container');
             const content = document.getElementById('content');
-            const contentTitle = document.getElementById('content-title');
-            const contentList = document.getElementById('content-list');
-
-            contentList.innerHTML = '';
+            const title = document.getElementById('content-title');
+            container.innerHTML = '';
             let found = false;
-
             Object.keys(data).forEach(category => {
                 data[category].forEach(item => {
-                    const name = item.name.toLowerCase();
-                    if (name.includes(query)) {
-                        const li = document.createElement('li');
-                        if (item.link) {
-                            const a = document.createElement('a');
-                            a.href = item.link;
-                            a.target = '_blank';
-                            a.textContent = item.name;
-                            li.appendChild(a);
-                        } else {
-                            li.textContent = `${item.name} (Deadline: ${item.deadline})`;
-                        }
-                        contentList.appendChild(li);
+                    if (item.name.toLowerCase().includes(query)) {
+                        const card = document.createElement('a');
+                        card.href = item.link;
+                        card.target = "_blank";
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <div class="card-icon"><i class="fas fa-folder-open"></i></div>
+                            <div class="card-title">${item.name}</div>
+                        `;
+                        container.appendChild(card);
                         found = true;
                     }
                 });
             });
-
             if (found) {
-                contentTitle.textContent = 'Search Results';
+                title.textContent = 'Search Results';
                 content.style.display = 'block';
-            } else if (query.trim() !== '') {
-                contentTitle.textContent = 'No Results Found';
+            } else if (query.trim()) {
+                title.textContent = 'No Results Found';
                 content.style.display = 'block';
             } else {
                 content.style.display = 'none';
             }
+        }
+
+        function redirectToAttendance() {
+            const attendanceUrl = "https://forms.office.com/pages/responsepage.aspx?id=pDcHlUcpzkacU0co8B_VmBKjrn5LxzZFjTOV1tOny3pUN0pVWFc3WVNSNElNV01BN1A5TFFJVVdCNy4u";
+            window.open(attendanceUrl, "_blank");
+        }
+
+        function redirectToForm() {
+            // Redirect to your Google Form
+            const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSezMjaO3ZIRAybrseqx7usLRtsTsX0gtwE3tBHDWtaYK2SlGQ/viewform?usp=dialog"; // Replace with your Google Form link
+            window.open(googleFormUrl, "_blank");
         }
     </script>
 </body>
