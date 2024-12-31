@@ -112,13 +112,6 @@
             font-size: 14px;
             color: #666;
         }
-        .upload-section {
-            text-align: center;
-            margin-top: 30px;
-        }
-        .upload-section input[type="file"] {
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -137,7 +130,7 @@
         </div>
 
         <div class="search">
-            <input type="text" id="search-bar" placeholder="Search..." oninput="searchItems()">
+            <input type="text" id="search-bar" placeholder="Search files..." oninput="debouncedSearch()">
         </div>
 
         <div id="content" style="display: none;">
@@ -153,14 +146,14 @@
     <script>
         const data = {
             presentations: [
-                { name: "Dataset Description", link: "https://drive.google.com/open?id=1oN_FS9UVtU68vDyvsJzxybPRxanS2sBV" },
-                { name: "Accuracy", link: "https://drive.google.com/open?id=12mPDedHGGVidSgzQAkcAVnEYVxUCQ7Ah" }
+                { name: "Dataset Description" },
+                { name: "Accuracy" }
             ],
             reports: [            ],
             colab: [            ],
             datasets: [
-                { name: "Plant Village dataset containing 38 classes of plants with around 54,303 images ", link: "https://www.kaggle.com/datasets/mohitsingh1804/plantvillage" },
-                { name: "Plant Village dataset containing 38 classes of plants with around 87,900 images ", link: "https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset" }
+                { name: "Plant Village dataset containing 38 classes of plants with around 54,303 images " },
+                { name: "Plant Village dataset containing 38 classes of plants with around 87,900 images " }
             ],
             tasks: [
               { "name": "Analyze the Dataset", "deadline": "10-Jan-2024" },
@@ -169,9 +162,14 @@
               { "name": "Analyze Our Designed Models", "deadline": "17-Jan-2024" },
               { "name": "Write Code for Each Layer in a CNN Architecture", "deadline": "19-Jan-2024" }
             ]
-
-
         };
+
+        // Debounce function
+        let debounceTimer;
+        function debouncedSearch() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => searchFiles(), 500);
+        }
 
         function showCategory(category) {
             const container = document.getElementById('card-container');
@@ -180,9 +178,7 @@
             container.innerHTML = '';
             if (data[category]) {
                 data[category].forEach(item => {
-                    const card = document.createElement('a');
-                    card.href = item.link;
-                    card.target = "_blank";
+                    const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
                         <div class="card-icon"><i class="fas fa-folder-open"></i></div>
@@ -197,19 +193,19 @@
             }
         }
 
-        function searchItems() {
+        function searchFiles() {
             const query = document.getElementById('search-bar').value.toLowerCase();
             const container = document.getElementById('card-container');
             const content = document.getElementById('content');
             const title = document.getElementById('content-title');
             container.innerHTML = '';
             let found = false;
-            Object.keys(data).forEach(category => {
+            // Only search in file-related categories: presentations, datasets, and colab
+            const fileCategories = ['presentations', 'datasets', 'colab'];
+            fileCategories.forEach(category => {
                 data[category].forEach(item => {
                     if (item.name.toLowerCase().includes(query)) {
-                        const card = document.createElement('a');
-                        card.href = item.link;
-                        card.target = "_blank";
+                        const card = document.createElement('div');
                         card.className = 'card';
                         card.innerHTML = `
                             <div class="card-icon"><i class="fas fa-folder-open"></i></div>
@@ -237,8 +233,7 @@
         }
 
         function redirectToForm() {
-            // Redirect to your Google Form
-            const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSezMjaO3ZIRAybrseqx7usLRtsTsX0gtwE3tBHDWtaYK2SlGQ/viewform?usp=dialog"; // Replace with your Google Form link
+            const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSezMjaO3ZIRAybrseqx7usLRtsTsX0gtwE3tBHDWtaYK2SlGQ/viewform?usp=dialog";
             window.open(googleFormUrl, "_blank");
         }
     </script>
